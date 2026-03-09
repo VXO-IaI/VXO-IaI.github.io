@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VXO-IaI — Sovereign Neural Access</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400&family=Courier+Prime&display=swap" rel="stylesheet">
+    <style>
+        :root { --gold: #d4af37; --bg: #030303; --glass: rgba(212, 175, 55, 0.03); }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
+        /* Mouse Follower Aura */
+        #cursor-aura {
+            position: fixed; top: 0; left: 0; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.07) 0%, transparent 70%);
+            transform: translate(-50%, -50%); pointer-events: none; z-index: 0; 
+            transition: transform 0.15s ease-out; will-change: transform;
+        }
+
+        /* Sovereign Grid Background */
+        .grid-bg {
+            position: fixed; width: 200%; height: 200%;
+            background-image: linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px; top: -50%; left: -50%; z-index: -1;
+            animation: moveGrid 120s linear infinite; pointer-events: none;
+        }
+        @keyframes moveGrid { from { transform: translateY(0); } to { transform: translateY(500px); } }
+
+        /* Ghost Boot Overlay */
+        #vxo-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000;
+            z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            font-family: 'Courier Prime', monospace; color: var(--gold); transition: opacity 2s ease;
+        }
+
+        /* Branding & Auth Screen */
+        .container { text-align: center; position: relative; z-index: 10; transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); padding: 20px; }
+        .logo { 
+            font-size: clamp(4rem, 15vw, 9rem); font-weight: 100; letter-spacing: 25px; 
+            background: linear-gradient(135deg, #fff 20%, var(--gold) 50%, #444 90%);
+            -webkit-background-clip: text; background-clip: text; color: transparent; margin: 0;
+            filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.2)); cursor: default;
+        }
+
+        .status-badge { 
+            border: 1px solid var(--gold); color: var(--gold); font-size: 0.55rem; 
+            padding: 8px 30px; letter-spacing: 6px; margin: 30px 0; display: inline-block;
+            background: rgba(212, 175, 55, 0.05); text-transform: uppercase; backdrop-filter: blur(5px);
+        }
+        
+        .access-btn { 
+            margin-top: 50px; padding: 18px 60px; background: transparent; border: 1px solid #1a1a1a; 
+            color: var(--gold); cursor: pointer; letter-spacing: 6px; font-size: 0.65rem; transition: 0.6s; 
+            backdrop-filter: blur(10px); position: relative; overflow: hidden; outline: none;
+        }
+        .access-btn:hover { border-color: var(--gold); box-shadow: 0 0 40px rgba(212, 175, 55, 0.2); transform: translateY(-3px); }
+
+        /* Neural Dashboard */
+        #dashboard { display: none; width: 100%; max-width: 1200px; margin: 0 auto; padding: 100px 20px; opacity: 0; transform: translateY(40px); transition: 1.5s ease; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; margin-top: 60px; }
+        .node { 
+            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(212, 175, 55, 0.1); padding: 45px; 
+            transition: 0.5s; cursor: pointer; backdrop-filter: blur(20px); position: relative;
+        }
+        .node:hover { border-color: var(--gold); transform: translateY(-5px); background: rgba(212, 175, 55, 0.04); }
+        .node::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 0; background: var(--gold); transition: 0.5s; }
+        .node:hover::before { height: 100%; }
+
+        .node-title { letter-spacing: 5px; color: var(--gold); font-weight: 300; margin-bottom: 15px; text-transform: uppercase; font-size: 1rem; }
+        .node-desc { font-size: 0.75rem; color: #777; line-height: 1.8; letter-spacing: 1px; }
+
+        footer { margin-top: 100px; text-align: center; border-top: 1px solid #111; padding-top: 40px; padding-bottom: 40px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="cursor-aura"></div>
+    <div class="grid-bg"></div>
+
+    <div id="vxo-overlay">
+        <div id="neural-text" style="letter-spacing: 5px; font-size: 0.8rem;"></div>
+        <div style="width: 250px; height: 1px; background: #111; margin-top: 40px; position: relative;">
+            <div id="progress" style="width: 0%; height: 100%; background: var(--gold); transition: 0.6s;"></div>
+        </div>
+    </div>
+
+    <div class="container" id="auth-screen">
+        <h1 class="logo">VXO</h1>
+        <div class="status-badge">Sovereign Identity Verified</div>
+        <p style="color: #444; font-size: 0.7rem; letter-spacing: 4px; font-weight: 300; line-height: 2.5;">
+            PROPRIETARY NEURAL CORE © 2026 VXO-IaI™ <br>
+            <span style="color: var(--gold); opacity: 0.7;">ARCHITECTED BY 0IaI — ALL RIGHTS RESERVED</span>
+        </p>
+        <button class="access-btn" onclick="grantAccess()">GRANT SOVEREIGN ACCESS</button>
+    </div>
+
+    <div id="dashboard">
+        <h2 style="font-weight: 100; letter-spacing: 20px; text-align: center; color: #fff; margin-bottom: 20px;">NEURAL NODES</h2>
+        <p style="text-align: center; color: var(--gold); font-size: 0.6rem; letter-spacing: 5px; margin-bottom: 80px; opacity: 0.6;">ACCESSING GHOST PROTOCOLS</p>
+        
+        <div class="grid">
+            <div class="node">
+                <div style="font-size: 0.6rem; color: var(--gold); margin-bottom: 15px; opacity: 0.5;">IDENT: 0xVXO-ALPHA</div>
+                <h3 class="node-title">Linguistic.Core</h3>
+                <p class="node-desc">Direct neural interfacing for high-frequency linguistic deciphering. Bypassing traditional rote memorization.</p>
+                <div style="width: 100%; height: 1px; background: #1a1a1a; margin-top: 25px;"><div style="width: 88%; height: 100%; background: var(--gold); box-shadow: 0 0 10px var(--gold);"></div></div>
+            </div>
+
+            <div class="node">
+                <div style="font-size: 0.6rem; color: var(--gold); margin-bottom: 15px; opacity: 0.5;">IDENT: 0xVXO-GHOST</div>
+                <h3 class="node-title">Pattern.Engine</h3>
+                <p class="node-desc">Encrypted AI protocol designed to align linguistic patterns with innate cognitive frequencies.</p>
+                <div style="width: 100%; height: 1px; background: #1a1a1a; margin-top: 25px;"><div style="width: 42%; height: 100%; background: var(--gold);"></div></div>
+            </div>
+
+            <div class="node" style="opacity: 0.3; cursor: not-allowed;">
+                <div style="font-size: 0.6rem; color: #444; margin-bottom: 15px;">IDENT: 0xVXO-VOID</div>
+                <h3 class="node-title" style="color: #444;">Neural.Sync</h3>
+                <p class="node-desc">Status: Locked. Waiting for Genesis Phase completion.</p>
+            </div>
+        </div>
+
+        <footer>
+            <p style="color: #333; font-size: 0.6rem; letter-spacing: 3px; font-weight: 300;">
+                ALL RIGHTS RESERVED © 2026 VXO-IaI INTELLIGENCE LABS <br>
+                <span style="color: var(--gold); opacity: 0.5;">SYSTEM SIGNATURE: 0x-VXO-SVRGN-IAI-777</span>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Mouse Aura Logic
+        const aura = document.getElementById('cursor-aura');
+        document.addEventListener('mousemove', (e) => {
+            aura.style.left = e.clientX + 'px';
+            aura.style.top = e.clientY + 'px';
+        });
+
+        // Sovereign Boot Logic
+        const bootMsgs = [
+            "> INITIALIZING AUTHENTICATION...", 
+            "> CHECKING IP SOVEREIGNTY...", 
+            "> ACCESSING GHOST PROTOCOL...", 
+            "> HANDSHAKE COMPLETE."
+        ];
+        let idx = 0;
+        function runBoot() {
+            if(idx < bootMsgs.length) {
+                document.getElementById('neural-text').innerText = bootMsgs[idx];
+                document.getElementById('progress').style.width = ((idx+1)*25) + "%";
+                idx++; setTimeout(runBoot, 1100);
+            } else {
+                setTimeout(() => {
+                    document.getElementById('vxo-overlay').style.opacity = "0";
+                    setTimeout(() => document.getElementById('vxo-overlay').style.display = "none", 1500);
+                }, 600);
+            }
+        }
+
+        // Access Transition Logic
+        function grantAccess() {
+            const screen = document.getElementById('auth-screen');
+            const dash = document.getElementById('dashboard');
+            
+            // Fade out auth screen
+            screen.style.opacity = "0";
+            screen.style.transform = "scale(0.95) translateY(-20px)";
+            
+            setTimeout(() => {
+                screen.style.display = "none";
+                dash.style.display = "block";
+                
+                // Trigger dashboard fade in
+                setTimeout(() => {
+                    dash.style.opacity = "1";
+                    dash.style.transform = "translateY(0)";
+                }, 100);
+            }, 1000);
+        }
+
+        window.onload = runBoot;
+    </script>
+</body>
+</html>
